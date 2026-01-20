@@ -1,0 +1,26 @@
+services:
+  db-service:
+    image: mysql:latest
+    container_name: mysql-db
+    environment:
+      - MYSQL_USER
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 5s
+      retries: 10
+  app-service:
+    build: ./app
+    container_name: golang-container
+    environment:
+      - DBHOST
+      - DBUSER
+      - DBPASS
+    depends_on:
+      db-service:
+        condition: service_healthy
+volumes:
+  mysql-data:
